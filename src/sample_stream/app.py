@@ -9,13 +9,12 @@ import sanic
 app = sanic.Sanic()
 
 @app.route("/stream/json")
-async def index(request):
+async def json_stream(request):
     async def content(response):
         limit = request.args.get('limit', None)
         if limit:
             limit = int(limit)
         interval = int(request.args.get('interval', '5'))
-
         count = 0
         while True:
             count += 1
