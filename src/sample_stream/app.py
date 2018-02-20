@@ -5,15 +5,26 @@ import json
 import asyncio
 
 import sanic
+
 app = sanic.Sanic()
 
 @app.route("/stream/json")
 async def index(request):
     async def content(response):
-        for i in range(10):
-            response.write(json.dumps({'id': datetime.now().timestamp()}))
-            await asyncio.sleep(5)
-    return sanic.response.stream(content, content_type='application/octet-stream')
+        limit = request.args.get('limit', None)
+        if limit:
+            limit = int(limit)
+        interval = int(request.args.get('interval', '5'))
+
+        count = 0
+        while True:
+            count += 1
+            response.write(json.dumps({'id': count, 'ts': int(datetime.now().timestamp())}))
+            response.write('\n')
+            if limit and limit <= count:
+                break
+            await asyncio.sleep(interval)
+    return sanic.response.stream(content, content_type='text/plain')
 
 
 if __name__ == '__main__':
