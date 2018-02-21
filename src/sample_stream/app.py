@@ -6,6 +6,8 @@ import asyncio
 
 import sanic
 
+from sample_stream.config import DEFAULT_TEMPLATE
+
 app = sanic.Sanic()
 
 @app.route("/stream/json")
@@ -15,7 +17,7 @@ async def json_stream(request):
         if limit:
             limit = int(limit)
         interval = int(request.args.get('interval', '5'))
-        template = request.args.get('template') or '''{"id": $count, "ts": "$ts"}'''
+        template = request.args.get('template') or DEFAULT_TEMPLATE
 
         count = 0
         while True:
