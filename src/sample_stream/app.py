@@ -15,16 +15,21 @@ async def json_stream(request):
         if limit:
             limit = int(limit)
         interval = int(request.args.get('interval', '5'))
+        template = request.args.get('template') or '''{"id": $count, "ts": "$ts"}'''
+
         count = 0
         while True:
             count += 1
-            response.write(json.dumps({'id': count, 'ts': int(datetime.now().timestamp())}))
-            response.write('\n')
+            output = template.replace('$count', str(count)).replace('$ts', str(int(datetime.now().timestamp())))
+            response.write(f'{output}\n')
             if limit and limit <= count:
                 break
             await asyncio.sleep(interval)
     return sanic.response.stream(content, content_type='text/plain')
 
+@app.route("/")
+async def index(request):
+    return sanic.response.text(f'Try it.: curl -N "{request.host}/stream/json?limit=30&interval=1"')
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8000)
